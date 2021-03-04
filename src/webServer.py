@@ -45,8 +45,8 @@ class Training(Resource):
 
     @staticmethod
     def get():
-        model = TrainModel.get(id=request.args.get('model_id', 1))
-        return jsonify({'model_name': model.model_name,
+        model = TrainModel.get(id=request.args.get('id', 1))
+        return jsonify({'model_name': model.name,
                         'model_accuracy': model.accuracy})
 
 
