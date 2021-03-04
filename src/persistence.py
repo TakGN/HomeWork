@@ -33,11 +33,11 @@ class Connection:
 class TrainModel(Base):
     __tablename__ = 'models'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
-    accuracy = Column(Integer)
-    train_date = Column(String)
+    name = Column(String, unique=True, nullable=False)
+    accuracy = Column(Integer, nullable=False)
+    train_date = Column(String, nullable=False)
     serving = Column(Boolean, nullable=False)
-    model_params = Column(Text)
+    model_params = Column(Text, nullable=False)
 
     def dict(self):
         return {
@@ -52,13 +52,13 @@ class TrainModel(Base):
     @classmethod
     def add(cls, **kwargs):
         """
-        Adds a new item in the database.
+        Adds a new model in the database.
         Args:
             **kwargs:
-             the collection of arguments necessary to create the desired item.
+             the collection of arguments necessary to create the desired model.
 
         Returns:
-            new_id: the newly added item id.
+            new_id: the newly added model id.
 
         """
         session = Connection.connect()
@@ -73,14 +73,14 @@ class TrainModel(Base):
     @classmethod
     def get(cls, **kwargs):
         """
-        Gets a specific item from the database.
+        Gets a specific model from the database.
 
         Args:
             **kwargs:
-                id: the to-be-queried item id.
+                id: the to-be-queried model id.
 
         Returns:
-            record: the desired item details.
+            record: the desired model details.
 
         """
         session = Connection.connect()
@@ -93,10 +93,10 @@ class TrainModel(Base):
     @classmethod
     def query(cls, **kwargs):
         """
-        Queries the database for all the items.
+        Queries the database for all the models.
 
         Returns:
-            record: A list of all the items' instances
+            record: A list of all the models' instances
                     currently present in the database.
         """
         session = Connection.connect()
