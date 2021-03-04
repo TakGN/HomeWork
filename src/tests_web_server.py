@@ -1,6 +1,6 @@
 from flask_testing import TestCase
 
-from webServer import app
+from web_server import app
 
 
 class TestPrediction(TestCase):

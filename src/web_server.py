@@ -35,7 +35,7 @@ class Prediction(Resource):
             model = Model.load_pipeline(model_path, model_name)
             prediction = model.predict(query_df).tolist()
             labels = {'model_name': model_name,
-                      'date': datetime.now().strftime("%m/%d/%Y")}
+                      'date': datetime.now()}
             if prediction[0]:
                 total_fraud_predictions.inc()
             total_predictions.labels(**labels).inc()
@@ -55,7 +55,7 @@ class Training(Resource):
             model_name = request.json.get('model_name')
             new_model = Model.get_model(model_params, model_name)
             accuracy = new_model[1]
-            date = datetime.now().strftime("%m/%d/%Y")
+            date = datetime.now()
             new_model = TrainModel.add(name=model_name,
                                        model_params=json.dumps(model_params),
                                        accuracy=accuracy,
@@ -71,14 +71,11 @@ class Training(Resource):
     def get():
         try:
             if request.args.get('id', ''):
-                model = TrainModel.get(id=request.args.get('id', 1))
+                model = TrainModel.get(model_id=request.args.get('id', 1))
                 return jsonify(model.dict())
             else:
                 models = TrainModel.query()
-                all_models = []
-                for model in models:
-                    all_models.append(model.dict())
-
+                all_models = [model.dict() for model in models]
                 return jsonify(all_models)
         except NoResultFound:
             return jsonify({'error': 'The queried model does not exist'})
