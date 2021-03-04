@@ -59,18 +59,17 @@ class Model:
         return predictions, score
 
     @staticmethod
-    def get_model():
+    def get_model(params, pipeline_name):
         df = Model.load_dataset(parameters.data_path, parameters.df_name)
         train_df, test_df = train_test_split(df, test_size=0.2)
-        fitted_pipeline = Model.train_pipeline(train_df, parameters.params,
+        fitted_pipeline = Model.train_pipeline(train_df, params,
                                                parameters.email_col, parameters.target)
         Model.save_fitted_pipeline(fitted_pipeline, parameters.model_path,
-                                   parameters.pipeline_name)
+                                   pipeline_name)
         results = Model.get_results(fitted_pipeline,
                                     test_df[[parameters.email_col]],
                                     test_df[parameters.target])
-        model = Model.load_pipeline(parameters.model_path, parameters.pipeline_name)
-        return model
+        return results
 
 
 
