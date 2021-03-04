@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Text, Boolean, UniqueConstraint, desc
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, validates
@@ -35,7 +35,7 @@ class TrainModel(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
     accuracy = Column(Integer, nullable=False)
-    train_date = Column(String, nullable=False)
+    train_date = Column(DateTime, nullable=False)
     serving = Column(Boolean, nullable=False)
     model_params = Column(Text, nullable=False)
 
@@ -71,13 +71,12 @@ class TrainModel(Base):
         return new_item
 
     @classmethod
-    def get(cls, **kwargs):
+    def get(cls, model_id):
         """
         Gets a specific model from the database.
 
         Args:
-            **kwargs:
-                id: the to-be-queried model id.
+            model_id: the to-be-queried model id.
 
         Returns:
             record: the desired model details.
@@ -85,13 +84,13 @@ class TrainModel(Base):
         """
         session = Connection.connect()
         q = session.query(cls)
-        q = q.filter_by(id=kwargs['id'])
+        q = q.filter_by(id=model_id)
         record = q.one()
         session.close()
         return record
 
     @classmethod
-    def query(cls, **kwargs):
+    def query(cls):
         """
         Queries the database for all the models.
 
