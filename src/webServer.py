@@ -3,14 +3,23 @@ from datetime import datetime
 
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
+from prometheus_client import Counter
 import pandas as pd
+from prometheus_flask_exporter import PrometheusMetrics
 
 from model import Model
 from persistence import TrainModel
 from parameters import model_path, pipeline_name, params
 
+total_predictions = Counter('predictions',
+                            'Total number of predictions',
+                            ['model_name', 'date'])
+total_fraud_predictions = Counter('fraud_predictions',
+                                  'Total number of fraud_predictions')
+
 app = Flask(__name__)
 api = Api(app)
+metrics = PrometheusMetrics(app)
 
 
 class Prediction(Resource):
@@ -21,8 +30,14 @@ class Prediction(Resource):
         model_name = request.json.get('model_name', pipeline_name)
         query_df = pd.DataFrame([{'email': email}])
         model = Model.load_pipeline(model_path, model_name)
-        # Number_requests_processed.inc()
-        return jsonify({'prediction for {}'.format(email): model.predict(query_df).tolist(),
+        prediction = model.predict(query_df).tolist()
+        labels = {'model_name': model_name,
+                  'date': datetime.now().strftime("%m/%d/%Y")}
+        if prediction[0]:
+            total_fraud_predictions.inc()
+
+        total_predictions.labels(**labels).inc()
+        return jsonify({'prediction for {}'.format(email): prediction,
                         'model_name': model_name
                         })
 
