@@ -1,10 +1,10 @@
-import json
 from datetime import datetime
+import json
 
 from flask import Flask, request, jsonify
 from flask_restful import Api, Resource
-from prometheus_client import Counter
 import pandas as pd
+from prometheus_client import Counter
 from prometheus_flask_exporter import PrometheusMetrics
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
