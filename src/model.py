@@ -20,13 +20,16 @@ class Model:
     def __init__(self):
         logger.info('starting the prediction')
 
+    @staticmethod
     def load_dataset(path, name):
         file_path = f"{path}/{name}"
         return pd.read_csv(file_path)
 
+    @staticmethod
     def define_model(**model_params):
         return GradientBoostingClassifier(**model_params)
 
+    @staticmethod
     def define_preprocessing(feature_name, tf_idf_params):
         tf_idf_transformer = Pipeline(
             [
@@ -35,17 +38,21 @@ class Model:
         )
         return ColumnTransformer([("email_transformer", tf_idf_transformer, feature_name)])
 
+    @staticmethod
     def define_pipeline(preprocess_pipeline, model):
         return Pipeline([("preprocessing", preprocess_pipeline), ("model", model)])
 
+    @staticmethod
     def save_fitted_pipeline(pipeline, path, name):
         file_path = f"{path}/{name}"
         joblib.dump(pipeline, file_path)
 
+    @staticmethod
     def load_pipeline(path, name):
         file_path = f"{path}/{name}"
         return joblib.load(file_path)
 
+    @staticmethod
     def train_pipeline(train_df, params, email_col, target):
         model = Model.define_model(**params["model_params"])
         preprocessing = Model.define_preprocessing(email_col, params["tf_idf_params"])
@@ -53,24 +60,24 @@ class Model:
         pipeline.fit(train_df[[email_col]], train_df[target])
         return pipeline
 
+    @staticmethod
     def get_results(fitted_pipeline, test_df, target_df):
         predictions = fitted_pipeline.predict(test_df)
         score = accuracy_score(predictions, target_df)
         return predictions, score
 
     @staticmethod
-    def get_model():
+    def get_model(params, pipeline_name):
         df = Model.load_dataset(parameters.data_path, parameters.df_name)
         train_df, test_df = train_test_split(df, test_size=0.2)
-        fitted_pipeline = Model.train_pipeline(train_df, parameters.params,
+        fitted_pipeline = Model.train_pipeline(train_df, params,
                                                parameters.email_col, parameters.target)
         Model.save_fitted_pipeline(fitted_pipeline, parameters.model_path,
-                                   parameters.pipeline_name)
+                                   pipeline_name)
         results = Model.get_results(fitted_pipeline,
                                     test_df[[parameters.email_col]],
                                     test_df[parameters.target])
-        model = Model.load_pipeline(parameters.model_path, parameters.pipeline_name)
-        return model
+        return results
 
 
 
