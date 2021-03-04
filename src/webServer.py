@@ -51,22 +51,36 @@ class Training(Resource):
         new_model = Model.get_model(model_params, model_name)
         accuracy = new_model[1]
         date = datetime.now().strftime("%m/%d/%Y")
-        TrainModel.add(name=model_name,
-                       model_params=json.dumps(model_params),
-                       accuracy=accuracy,
-                       serving=False,
-                       train_date=date)
-        return '{} is trained successfully'.format(model_name)
+        new_model = TrainModel.add(name=model_name,
+                                   model_params=json.dumps(model_params),
+                                   accuracy=accuracy,
+                                   serving=False,
+                                   train_date=date)
+        return jsonify(new_model.dict())
 
     @staticmethod
     def get():
-        model = TrainModel.get(id=request.args.get('id', 1))
-        return jsonify({'model_name': model.name,
-                        'model_accuracy': model.accuracy})
+        if request.args.get('id', ''):
+            model = TrainModel.get(id=request.args.get('id', 1))
+            return jsonify(model.dict())
+        else:
+            models = TrainModel.query()
+            all_models = []
+            for model in models:
+                all_models.append(model.dict())
+
+            return jsonify(all_models)
+
+    @staticmethod
+    def put():
+        body = request.json
+        model_id = request.args.get('id', '')
+        edited_model = TrainModel.edit(id=model_id, **body)
+        return jsonify(edited_model.dict())
 
 
 api.add_resource(Prediction, "/predict")
 api.add_resource(Training, "/train")
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

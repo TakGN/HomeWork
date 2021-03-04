@@ -1,3 +1,4 @@
+import json
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text, Boolean, UniqueConstraint, desc
 from sqlalchemy.ext.declarative import declarative_base
@@ -38,6 +39,16 @@ class TrainModel(Base):
     serving = Column(Boolean, nullable=False)
     model_params = Column(Text)
 
+    def dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'accuracy': self.accuracy,
+            'train_date': self.train_date,
+            'serving': self.serving,
+            'model_params': json.loads(self.model_params)
+        }
+
     @classmethod
     def add(cls, **kwargs):
         """
@@ -55,8 +66,9 @@ class TrainModel(Base):
         session.add(new_element)
         session.commit()
         new_id = new_element.id
+        new_item = session.query(cls).filter_by(id=new_id).one()
         session.close()
-        return new_id
+        return new_item
 
     @classmethod
     def get(cls, **kwargs):
@@ -81,19 +93,33 @@ class TrainModel(Base):
     @classmethod
     def query(cls, **kwargs):
         """
-        Gets a specific item from the database.
+        Queries the database for all the items.
+
+        Returns:
+            record: A list of all the items' instances
+                    currently present in the database.
+        """
+        session = Connection.connect()
+        record = session.query(cls).all()
+        session.close()
+        return record
+
+    @classmethod
+    def edit(cls, id, **kwargs):
+        """
+        Updates a certain item in the database.
 
         Args:
             **kwargs:
-                id: the to-be-queried item id.
-
-        Returns:
-            record: the desired item details.
-
+               the collection of arguments necessary to update the desired item.
         """
         session = Connection.connect()
         q = session.query(cls)
-        record = q.all()
+        q = q.filter_by(id=id).one()
+        for key, value in kwargs.items():
+            setattr(q, key, value)
+        session.commit()
+        record = session.query(cls).filter_by(id=id).one()
         session.close()
         return record
 
