@@ -8,11 +8,5 @@ params = {
     },
 }
 email_col = "email"
-
-data_path = "../data"
-model_path = "../model"
-
-df_name = "train.csv"
-
 pipeline_name = "fraud_model"
 target = "label"

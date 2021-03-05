@@ -9,16 +9,19 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
 import logging
-import parameters
+import default_parameters
 from sklearn.model_selection import train_test_split
 
+from settings import MODEL
 
 logger = logging.getLogger(__name__)
 
 
 class Model:
+
     def __init__(self):
         logger.info('starting the prediction')
+
 
     @staticmethod
     def load_dataset(path, name):
@@ -68,16 +71,18 @@ class Model:
 
     @staticmethod
     def get_model(params, pipeline_name):
-        df = Model.load_dataset(parameters.data_path, parameters.df_name)
+        df = Model.load_dataset(MODEL['data_path'], MODEL['df_name'])
         train_df, test_df = train_test_split(df, test_size=0.2)
         fitted_pipeline = Model.train_pipeline(train_df, params,
-                                               parameters.email_col, parameters.target)
-        Model.save_fitted_pipeline(fitted_pipeline, parameters.model_path,
+                                               default_parameters.email_col, default_parameters.target)
+        Model.save_fitted_pipeline(fitted_pipeline, MODEL['model_path'],
                                    pipeline_name)
         results = Model.get_results(fitted_pipeline,
-                                    test_df[[parameters.email_col]],
-                                    test_df[parameters.target])
+                                    test_df[[default_parameters.email_col]],
+                                    test_df[default_parameters.target])
         return results
+
+
 
 
 

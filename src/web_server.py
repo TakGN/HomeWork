@@ -11,11 +11,12 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from model import Model
 from persistence import TrainModel
-from parameters import model_path, pipeline_name, params
+from default_parameters import pipeline_name, params
+from settings import MODEL
 
 total_predictions = Counter('predictions',
                             'Total number of predictions',
-                            ['model_name', 'date'])
+                            ['model_name'])
 total_fraud_predictions = Counter('fraud_predictions',
                                   'Total number of fraud_predictions')
 
@@ -32,10 +33,9 @@ class Prediction(Resource):
             email = request.json.get('email', '')
             model_name = request.json.get('model_name', pipeline_name)
             query_df = pd.DataFrame([{'email': email}])
-            model = Model.load_pipeline(model_path, model_name)
+            model = Model.load_pipeline(MODEL['model_path'], model_name)
             prediction = model.predict(query_df).tolist()
-            labels = {'model_name': model_name,
-                      'date': datetime.now()}
+            labels = {'model_name': model_name}
             if prediction[0]:
                 total_fraud_predictions.inc()
             total_predictions.labels(**labels).inc()
@@ -51,7 +51,7 @@ class Training(Resource):
     @staticmethod
     def post():
         try:
-            model_params = request.json.get('model_params')
+            model_params = request.json.get('model_params', params)
             model_name = request.json.get('model_name')
             new_model = Model.get_model(model_params, model_name)
             accuracy = new_model[1]
