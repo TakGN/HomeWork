@@ -34,19 +34,23 @@ class TrainModel(Base):
     __tablename__ = 'models'
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
+    type = Column(String, nullable=False)
     accuracy = Column(Integer, nullable=False)
     train_date = Column(DateTime, nullable=False)
     serving = Column(Boolean, nullable=False)
     model_params = Column(Text, nullable=False)
+    processor_params = Column(Text, nullable=False)
 
     def dict(self):
         return {
             'id': self.id,
             'name': self.name,
+            'type': self.type,
             'accuracy': self.accuracy,
             'train_date': self.train_date,
             'serving': self.serving,
-            'model_params': json.loads(self.model_params)
+            'model_params': json.loads(self.model_params),
+            'processor_params': json.loads(self.processor_params)
         }
 
     @classmethod

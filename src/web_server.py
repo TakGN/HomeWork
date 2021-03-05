@@ -11,8 +11,9 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from model import Model
 from persistence import TrainModel
-from default_parameters import pipeline_name, params
+from default_parameters import pipeline_name, default_model_params, default_processor_params
 from settings import MODEL
+from dataset import Dataset
 
 total_predictions = Counter('predictions',
                             'Total number of predictions',
@@ -33,7 +34,7 @@ class Prediction(Resource):
             email = request.json.get('email', '')
             model_name = request.json.get('model_name', pipeline_name)
             query_df = pd.DataFrame([{'email': email}])
-            model = Model.load_pipeline(MODEL['model_path'], model_name)
+            model = Model(MODEL['model_path'], model_name)
             prediction = model.predict(query_df).tolist()
             labels = {'model_name': model_name}
             if prediction[0]:
@@ -42,6 +43,7 @@ class Prediction(Resource):
             return jsonify({'prediction for {}'.format(email): prediction,
                             'model_name': model_name
                             })
+
         except Exception as e:
             return jsonify({'error': str(e)})
 
@@ -51,13 +53,19 @@ class Training(Resource):
     @staticmethod
     def post():
         try:
-            model_params = request.json.get('model_params', params)
+            model_params = request.json.get('model_params', default_model_params)
+            processor_params = request.json.get('processor_params', default_processor_params)
             model_name = request.json.get('model_name')
-            new_model = Model.get_model(model_params, model_name)
-            accuracy = new_model[1]
+            model_type = request.json.get('model_type')
+            dataset = Dataset(MODEL['dataset_name'], MODEL['dataset_path'])
+            data = dataset.load()
+            model = Model(MODEL['model_path'], model_name, model_type, model_params, processor_params)
+            accuracy = model.fit(data)
             date = datetime.now()
             new_model = TrainModel.add(name=model_name,
+                                       type=model_type,
                                        model_params=json.dumps(model_params),
+                                       processor_params=json.dumps(processor_params),
                                        accuracy=accuracy,
                                        serving=False,
                                        train_date=date)
