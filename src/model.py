@@ -1,29 +1,20 @@
 import os
 
-import numpy as np
-import pandas as pd
 import joblib
 from sklearn.compose import ColumnTransformer
-from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score
 import logging
-import default_parameters
 from sklearn.model_selection import train_test_split
-
-from settings import MODEL
 
 logger = logging.getLogger(__name__)
 
 
 class Model:
-    def __init__(self, path, model_name, type=None, model_kwargs=None,
+    def __init__(self, path, model_name, model_kwargs=None,
                  processor_kwargs=None):
-        # self.type = "GradientBoostingClassifier"
-        self.type = type
         self.path = os.path.join(path, model_name)
         self.feature_name = "email"
         self.target_name = "label"

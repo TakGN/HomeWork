@@ -59,7 +59,7 @@ class Training(Resource):
             model_type = request.json.get('model_type')
             dataset = Dataset(MODEL['dataset_name'], MODEL['dataset_path'])
             data = dataset.load()
-            model = Model(MODEL['model_path'], model_name, model_type, model_params, processor_params)
+            model = Model(MODEL['model_path'], model_name, model_params, processor_params)
             accuracy = model.fit(data)
             date = datetime.now()
             new_model = TrainModel.add(name=model_name,
