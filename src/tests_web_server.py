@@ -22,17 +22,19 @@ class TestTraining(TestCase):
         return app
 
     def test_post(self):
-        payload = {"model_name": "FantasticModel",
-                   "model_type": "GradientBoosting",
-                   "model_params":  {
-                       "model_params": {"n_estimators": 50, "learning_rate": 0.1},
-                       "tf_idf_params": {
-                           "ngram_range": [4, 5],
-                           "strip_accents": "unicode",
-                           "analyzer": "char",
-                           "max_features": 1000}
-                   }
-                   }
+        payload = {
+                    "model_name": "Good_model",
+                    "model_type": "GradientBoosting",
+                    "model_params": {
+                        "n_estimators": 50, "learning_rate": 0.1
+                    },
+                    "processor_params": {
+                        "ngram_range": [4, 5],
+                        "strip_accents": "unicode",
+                        "analyzer": "char",
+                        "max_features": 1000
+                    }
+                }
         response = app.test_client().post('/train', data=payload,
                                           content_type='application/json')
         assert response.status_code == 200

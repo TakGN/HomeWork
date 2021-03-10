@@ -1,0 +1,21 @@
+global:
+  scrape_interval:     3s
+
+  external_labels:
+      monitor: 'deezer-app'
+
+rule_files:
+
+scrape_configs:
+  - job_name: 'prometheus'
+
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'deezer'
+
+    dns_sd_configs:
+      - names: ['localhost']
+        port: 5000
+        type: A
+        refresh_interval: 5s
